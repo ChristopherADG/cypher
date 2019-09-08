@@ -1,5 +1,8 @@
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <bitset>
+#include <sstream>
 
 using namespace std;
 
@@ -158,27 +161,39 @@ string applyS(string before, const string S[4][4])
     return S[pos1][pos2];
 }
 
-string halfEncrypt(string left, string right, string key)
+string halfEncrypt(string left, string right, string key, int brutal)
 {
 
     string ExHalf2 = apply8(right, EP); //EP con la segunda mitad (8 bits)
 
+    if (!brutal)
+        cout << "EP: " << ExHalf2 << endl;
+
     ExHalf2 = XOR(ExHalf2, key); //XOR con la primera key (8 bits)
 
+    if (!brutal)
+        cout << "XOR: " << ExHalf2 << endl;
+
     string leftExHalf2 = applyS(firstHalf(ExHalf2), S0); //(2 bits)
-    cout << "S0: " << leftExHalf2 << endl;
+    if (!brutal)
+        cout << "S0: " << leftExHalf2 << endl;
 
     string rightExHalf2 = applyS(secondHalf(ExHalf2), S1); //(2 bits)
-    cout << "S1: " << rightExHalf2 << endl;
+    if (!brutal)
+        cout << "S1: " << rightExHalf2 << endl;
 
     string join = applyP4(leftExHalf2 + rightExHalf2); //(4 bits)
+    if (!brutal)
+        cout << "P4: " << join << endl;
 
     left = XOR(join, left); //(4 bits)
+    if (!brutal)
+        cout << "XOR: " << left << endl;
 
     return left + right; //(8 bits)
 }
 
-string encrypt(string key, string plainText, int decrypt)
+string encrypt(string key, string plainText, int decrypt, int brutal)
 {
     //Getting keys
     getKeys(key);
@@ -200,43 +215,100 @@ string encrypt(string key, string plainText, int decrypt)
 
     plainText = apply8(plainText, IP); //IP
 
+    if (!brutal)
+        cout << "IP: " << plainText << endl;
+
     string half1 = firstHalf(plainText);
     string half2 = secondHalf(plainText);
 
-    string firstStep = halfEncrypt(half1, half2, key1);
+    string firstStep = halfEncrypt(half1, half2, key1, brutal);
 
     half1 = secondHalf(firstStep); //Switch
     half2 = firstHalf(firstStep);  //Switch
 
-    string secondStep = halfEncrypt(half1, half2, key2);
+    if (!brutal)
+        cout << "Switch: " << half1 + half2 << endl;
+
+    string secondStep = halfEncrypt(half1, half2, key2, brutal);
 
     string encryptedText = apply8(secondStep, IP_1); //IP
 
     return encryptedText;
 }
 
+void brutalForce(string plaintext, string encrypted, int interacion)
+{
+    int find = 0;
+    for (int i = 0; i <= 1023; i++)
+    {
+        bitset<10> key(i);
+        stringstream ss;
+        ss << key;
+        string s;
+        ss >> s;
+        if (encrypt(s, plaintext, 0, 1).compare(encrypted) == 0)
+        {
+            find = 1;
+            cout << interacion << "- " << key << endl;
+            break;
+        }
+    }
+
+    if(!find){
+        cout << interacion << "- No encontrado" << endl;
+    }
+
+}
+
+//1001100100
+
 int main()
 {
     string key, text;
-    int decrypt;
+    int decrypt, brutal;
 
-    cout << "Input a 10-bit key: " << endl;
-    cin >> key;
+    cout << "Select mode:" << endl;
+    cout << "0- Normal: " << endl;
+    cout << "1- Brutal: " << endl;
+    cin >> brutal;
 
-    cout << "Input a 8-bit text: " << endl;
-    cin >> text;
+    if (!brutal)
+    {
+        cout << "Input a 10-bit key: " << endl;
+        cin >> key;
 
-    cout << "select Encrypt or Decrypt: " << endl;
-    cout << "0- Encrypt: " << endl;
-    cout << "1- Decrypt: " << endl;
-    cin >> decrypt;
+        cout << "Input a 8-bit text: " << endl;
+        cin >> text;
 
-    string result = encrypt(key, text, decrypt);
+        cout << "select Encrypt or Decrypt: " << endl;
+        cout << "0- Encrypt: " << endl;
+        cout << "1- Decrypt: " << endl;
+        cin >> decrypt;
+        string result = encrypt(key, text, decrypt, brutal);
 
-    cout << "10-bit key: " << key << endl;
-    cout << "8-bit text: " << text << endl;
-
-    cout << "Encrypted Text: " << result << endl;
+        cout << "10-bit key: " << key << endl;
+        cout << "8-bit text: " << text << endl;
+        if (decrypt)
+        {
+            cout << "Decrypted Text: " << result << endl;
+        }
+        else
+        {
+            cout << "Encrypted Text: " << result << endl;
+        }
+    }
+    else
+    {
+        ifstream file("brutalFile.txt");
+        string str;
+        int interacion = 1;
+        while (std::getline(file, str))
+        {
+            brutalForce(str.substr(0, 8), str.substr(9), interacion);
+            
+            interacion++;
+        }
+    }
 
     return 0;
 }
