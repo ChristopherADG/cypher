@@ -55,16 +55,10 @@ string applyP4(string before)
     return after;
 }
 
-string leftShift(string before)
+string leftShift(string before, int pos)
 {
     int length = before.length();
-    return before.substr(1, length) + before.substr(0, 1);
-}
-
-string leftShift2(string before)
-{
-    int length = before.length();
-    return before.substr(2, length) + before.substr(0, 2);
+    return before.substr(pos, length) + before.substr(0, pos);
 }
 
 string firstHalf(string before)
@@ -87,15 +81,15 @@ void getKeys(string key)
     string half1 = firstHalf(key);
     string half2 = secondHalf(key);
 
-    half1 = leftShift(half1);
-    half2 = leftShift(half2);
+    half1 = leftShift(half1, 1);
+    half2 = leftShift(half2, 1);
 
     string join = half1 + half2;
 
     string key1 = apply8(join, P8);
 
-    half1 = leftShift2(half1);
-    half2 = leftShift2(half2);
+    half1 = leftShift(half1, 2);
+    half2 = leftShift(half2, 2);
 
     join = half1 + half2;
 
@@ -254,10 +248,10 @@ void brutalForce(string plaintext, string encrypted, int interacion)
         }
     }
 
-    if(!find){
+    if (!find)
+    {
         cout << interacion << "- No encontrado" << endl;
     }
-
 }
 
 //1001100100
@@ -305,7 +299,7 @@ int main()
         while (std::getline(file, str))
         {
             brutalForce(str.substr(0, 8), str.substr(9), interacion);
-            
+
             interacion++;
         }
     }
