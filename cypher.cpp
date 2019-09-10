@@ -25,6 +25,8 @@ const int IP_1[8] = {4, 1, 3, 5, 7, 2, 8, 6};
 
 string keys[2];
 
+string brutalKey = "0000000000";
+
 string applyP10(string before)
 {
     string after;
@@ -233,7 +235,7 @@ string encrypt(string key, string plainText, int decrypt, int brutal)
 void brutalForce(string plaintext, string encrypted, int interacion)
 {
     int find = 0;
-    for (int i = 0; i <= 1023; i++)
+    for (int i = stoi(brutalKey, nullptr, 2); i <= 1023; i++)
     {
         bitset<10> key(i);
         stringstream ss;
@@ -243,7 +245,12 @@ void brutalForce(string plaintext, string encrypted, int interacion)
         if (encrypt(s, plaintext, 0, 1).compare(encrypted) == 0)
         {
             find = 1;
-            cout << interacion << "- " << key << endl;
+            //cout << interacion << "- " << key << endl;
+            if (brutalKey.compare(s) != 0)
+            {
+                brutalKey = s;
+            }
+
             break;
         }
     }
@@ -302,6 +309,7 @@ int main()
 
             interacion++;
         }
+        cout << "Brutal Key: " << brutalKey << endl;
     }
 
     return 0;
