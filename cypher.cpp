@@ -268,10 +268,12 @@ int main()
     string key, text;
     int decrypt, brutal;
 
-    cout << "Select mode:" << endl;
+    /*cout << "Select mode:" << endl;
     cout << "0- Normal: " << endl;
     cout << "1- Brutal: " << endl;
     cin >> brutal;
+    */
+    brutal = 1;
 
     if (!brutal)
     {
